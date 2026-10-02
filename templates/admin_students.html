@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<!--html-->
+    <head>
+        <title>Students</title>
+        <style>
+        .student-toolbar{
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:20px;
+            gap:10px;
+        }
+
+        .student-toolbar input{
+
+            flex:1;
+            padding:10px;
+            border-radius:8px;
+            border:1px solid #ccc;
+        }
+        .student-toolbar button{
+            padding:10px 15px;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+        }
+        .student-table{
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        .student-table th,
+        .student-table td{
+            padding:12px;
+            border-bottom:1px solid #ddd;
+        }
+        .student-table tr:hover{
+            background:#f5f5f5;
+        }
+        .student-count{
+            margin-bottom:15px;
+            font-weight:bold;
+        }
+</style>
+    </head>
+    <body>
+        <h1>Student Management</h1>
+
+        <div id="formBox" style="display:none">
+            <input id="reg_no" placeholder="Registration Number">
+            <input id="full_name" placeholder="Full Name">
+            <button onclick="addStudent()">
+                Save
+            </button>
+        </div>
+        
+        <div class="student-toolbar">
+            <input type="text" id="searchInput" placeholder="Search student..." ">
+            <button onclick="showForm()">
+                + Add Student
+            </button>
+        </div>
+        <script>
+        document
+        .getElementById("searchInput")
+        .addEventListener("keypress", function(e){
+            if(e.key === "Enter"){
+                searchStudents();
+            }
+       });
+        </script>
+
+
+<div class="student-count">
+    Total Students:
+    <span id="studentCount">0</span>
+</div>
+
+<table class="student-table">
+    <thead>
+        <tr>
+            <th>Reg. Number</th>
+            <th>Name</th>
+            <th>ID</th>
+            <th>Actions</th>
+        </tr>
+
+    </thead>
+    <tbody id="studentTable"></tbody>
+</table>
+        <hr>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Reg No</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody id="studentTable"></tbody>
+        </table>
+        <script>
+            function showForm(){
+                document.getElementById("formBox").style.display="block";
+            }
+
+            async function loadStudents(){
+                let r = await fetch("/api/students");
+                let data = await r.json();
+                let html = "";
+                data.forEach(s=>{
+                    html += `
+                    <tr>
+                        <td>${s.reg_no}</td>
+                        <td>${s.full_name}</td>
+                        <td>${s.id}</td>
+                        <td>
+                            <button onclick="viewStudent(${s.id})">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                    `;
+                });
+
+                document.getElementById(
+                    "studentTable"
+                ).innerHTML = html;
+            }
+            loadStudents();
+        </script>
+
+    </body>
+<head>
+    <title>Students</title>
+</head>
+<body>
+
+<h1>Student Management</h1>
+<button onclick="showForm()">
+    Add Student
+</button>
+
+<div id="formBox" style="display:none">
+    <input id="reg_no" placeholder="Registration Number">
+    <input id="full_name" placeholder="Full Name">
+    <button onclick="addStudent()">
+        Save
+    </button>
+</div>
+
+<hr>
+<table border="1">
+    <thead>
+        <tr>
+            <th>Reg No</th>
+            <th>Name</th>
+        </tr>
+    </thead>
+    <tbody id="studentTable"></tbody>
+</table>
+
+<script>
+function showForm(){
+    document.getElementById("formBox").style.display="block";
+}
+
+async function loadStudents(){
+    let r = await fetch("/api/students");
+    let data = await r.json();
+    renderStudents(data);
+}
+
+async function searchStudents(){
+    let q = document
+        .getElementById("searchInput")
+        .value;
+
+    let r = await fetch(
+        `/api/students/search?q=${q}`
+    );
+    let data = await r.json();
+    console.log(data);
+    renderStudents(data);
+}
+
+
+function renderStudents(data){
+    let html = "";
+    data.forEach(s=>{
+        html += `
+        <tr>
+            <td>${s.id}</td>
+            <td>${s.reg_no}</td>
+            <td>${s.full_name}</td>
+            <td>
+                <button
+                    onclick="viewStudent(${s.id})">
+                    View
+                </button>
+            </td>
+        </tr>
+        `;
+    });
+    document
+        .getElementById("studentTable")
+        .innerHTML = html;
+
+    document
+        .getElementById("studentCount")
+        .innerText = data.length;
+}
+
+function viewStudent(id){
+    alert(
+        "Student Profile Coming Soon\nID: " + id
+    );
+}
+</script>
+
+</body>
+</html>

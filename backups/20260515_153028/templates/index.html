@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <link rel="stylesheet" href="/static/css/modern.css">
+</head>
+<body class="home-body">
+  <header class="home-header">
+    <img src="{{ url_for('static', filename='images.png') }}" alt="NTISD Logo" class="home-logo">
+    <h1>Nsamizi Training Institute</h1>
+    <p>Digital Fortress System - Student Management Platform</p>
+    <a href="/login" class="btn btn-primary btn-lg">Login to System</a>
+    <a href="/about">About NTISD</a>
+  </header>
+  <main class="home-main">
+    <section class="hero">
+      <h2>Welcome to Nsamizi Digital Fortress</h2>
+      <p>A comprehensive academic tracking system for students, lecturers, and administrative staff. Manage courses, marks, fees, and performance all in one secure platform.</p>
+    </section>
+    <section class="features">
+      <div class="feature-card">
+        <h3>📚 Student Portal</h3>
+        <p>View your courses, track marks across semesters, monitor tuition payment status, and receive daily inspirational quotes.</p>
+      </div>
+      <div class="feature-card">
+        <h3>👨‍🏫 Lecturer Dashboard</h3>
+        <p>Manage your courses, input student marks with assessments, view student performance, and generate semester reports.</p>
+      </div>
+      <div class="feature-card">
+        <h3>📊 Admin Panel</h3>
+        <p>Oversee system performance, monitor login activity, track suspicious behavior, manage users, and generate analytics.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🎯 Coordinator Tools</h3>
+        <p>Monitor center performance, track missing marks, verify student details, and coordinate between lecturers and administration.</p>
+      </div>
+      <div class="feature-card">
+        <h3>💰 Fee Management</h3>
+        <p>Complete tuition tracking system with payment status, reminders for unpaid fees, and semester-based billing.</p>
+      </div>
+      <div class="feature-card">
+        <h3>🔒 Enterprise Security</h3>
+        <p>Bcrypt password hashing, brute-force protection, SQL injection prevention, and comprehensive audit logging.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="home-footer" style="margin-top: 3rem;">
+    <p>&copy; 2026 Nsamizi Training Institute. All rights reserved.</p>
+  </footer>
+</body>
+</html>
+
+<script>
+const API = "/api";
+
+let selectedPerson = null;
+document.getElementById('loadPeople').onclick = async () => {
+  const role = document.getElementById('roleSel').value;
+  try {
+    const res = await fetch(`${API}/people?role=${role}`, { method: 'GET', credentials: 'include' });
+    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+    const data = await res.json();
+    const list = document.getElementById('peopleList');
+    list.innerHTML = '';
+    data.forEach(p => {
+      const btn = document.createElement('button');
+      btn.className = "w-full text-left p-2 border rounded";
+      btn.textContent = `${p.name} — ${p.branch}`;
+      btn.onclick = () => {
+        selectedPerson = p;
+        document.getElementById('selName').textContent = p.name;
+        document.getElementById('staffAuth').classList.remove('hidden');
+      };
+      list.appendChild(btn);
+    });
+    addAZPanel('peopleList');
+  } catch (e) {
+    console.error('Error loading people:', e);
+    document.getElementById('staffMsg').textContent = 'Failed to load names';
+  }
+};
+
+document.getElementById('staffLoginBtn').onclick = async () => {
+  const pwd = document.getElementById('staffPwd').value;
+  if (!selectedPerson) { alert("Pick a person first"); return; }
+  try {
+    const r = await fetch('/api/login_person', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({person_id: selectedPerson.id, password: pwd}),
+      credentials: 'include'
+    });
+    const d = await r.json();
+    document.getElementById('staffMsg').textContent = d.ok ? "Logged in." : (d.msg || "failed");
+    if (d.ok) {
+      document.getElementById('staffAuth').classList.add('hidden');
+      window.open('/staff/dashboard', '_blank');
+      const r2 = await fetch('/api/my/courses', { credentials: 'include' });
+      const courses = await r2.json();
+      const list = document.getElementById('myCourses');
+      list.innerHTML = '';
+      courses.forEach(c => {
+        const b = document.createElement('button');
+        b.className = "w-full text-left p-2 border rounded";
+        b.textContent = `${c.code} — ${c.title}`;
+        b.onclick = () => openCourse(c);
+        list.appendChild(b);
+      });
+      const rc = await fetch('/api/my/centers', { credentials: 'include' });
+      const centers = await rc.json();
+      const centersArea = document.getElementById('centersArea');
+      let html = "<h4 class='mt-4 font-semibold'>My Centers</h4><div class='space-y-2'>";
+      centers.my_centers.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = "w-full text-left p-2 border rounded";
+        btn.textContent = c.name;
+        btn.onclick = () => loadCenterStudents(c.id);
+        html += btn.outerHTML;
+      });
+      html += "</div>";
+      html += "<h4 class='mt-4 font-semibold'>Other Centers</h4><ul class='list-disc ml-6'>";
+      centers.other_centers.forEach(c => {
+        html += `<li>${c.name}</li>`;
+      });
+      html += "</ul>";
+      centersArea.innerHTML = html;
+      document.getElementById('staffPanel').classList.remove('hidden');
+    }
+  } catch (e) {
+    console.error('Error logging in:', e);
+    document.getElementById('staffMsg').textContent = 'Login failed';
+  }
+};
+
+async function loadCenterStudents(branch_id) {
+  try {
+    const r = await fetch(`/api/branch/${branch_id}/students`, { credentials: 'include' });
+    const students = await r.json();
+    const centerStudents = document.getElementById('centerStudents');
+    centerStudents.innerHTML = '<h4 class="font-semibold">Students in Center</h4><div class="space-y-2 max-h-40 overflow-auto mt-2">';
+    students.forEach(s => {
+      centerStudents.innerHTML += `<div class="p-2 border rounded">${s.reg_no} — ${s.name}</div>`;
+    });
+    centerStudents.innerHTML += '</div>';
+  } catch (e) {
+    console.error('Error loading center students:', e);
+  }
+}
+
+async function openCourse(c) {
+  document.getElementById('courseArea').classList.remove('hidden');
+  document.getElementById('courseTitle').textContent = `${c.code} — ${c.title}`;
+  try {
+    const [stR, asR] = await Promise.all([
+      fetch(`/api/course/${c.course_id}/students`, { credentials: 'include' }),
+      fetch(`/api/course/${c.course_id}/assessments`, { credentials: 'include' })
+    ]);
+    const students = await stR.json();
+    const assessments = await asR.json();
+    const stList = document.getElementById('courseStudents');
+    const asList = document.getElementById('courseAssess');
+    stList.innerHTML = ''; asList.innerHTML = '';
+    students.forEach(s => {
+      const b = document.createElement('button');
+      b.className = "w-full text-left p-2 border rounded";
+      b.textContent = `${s.reg_no} — ${s.name}`;
+      b.onclick = () => document.getElementById('mkStudentId').value = s.student_id;
+      stList.appendChild(b);
+    });
+    assessments.forEach(a => {
+      const b = document.createElement('button');
+      b.className = "w-full text-left p-2 border rounded";
+      b.textContent = `${a.title} (max ${a.max_score})`;
+      b.onclick = () => document.getElementById('mkAssessId').value = a.assessment_id;
+      asList.appendChild(b);
+    });
+  } catch (e) {
+    console.error('Error loading course data:', e);
+  }
+}
+
+document.getElementById('mkSave').onclick = async () => {
+  const payload = {
+    student_id: Number(document.getElementById('mkStudentId').value),
+    assessment_id: Number(document.getElementById('mkAssessId').value),
+    scored: Number(document.getElementById('mkScore').value)
+  };
+  try {
+    const r = await fetch('/api/marks', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+      credentials: 'include'
+    });
+    const d = await r.json();
+    document.getElementById('mkMsg').textContent = d.ok ? "Saved." : (d.msg || "error");
+  } catch (e) {
+    console.error('Error saving mark:', e);
+    document.getElementById('mkMsg').textContent = 'Error saving mark';
+  }
+};
+
+document.getElementById('loadCourseStudents').onclick = async () => {
+  try {
+    const r = await fetch('/api/students', { method: 'GET', credentials: 'include' });
+    if (!r.ok) throw new Error(`HTTP error! Status: ${r.status}`);
+    const students = await r.json();
+    const list = document.getElementById('studentList');
+    list.innerHTML = '';
+    students.forEach(s => {
+      const b = document.createElement('button');
+      b.className = "w-full text-left p-2 border rounded";
+      b.textContent = `${s.reg_no} — ${s.name}`;
+      b.onclick = () => {
+        document.getElementById('selStudent').textContent = s.name;
+        document.getElementById('studentAuth').classList.remove('hidden');
+        window._selStudent = s;
+      };
+      list.appendChild(b);
+    });
+    addAZPanel('studentList');
+  } catch (e) {
+    console.error('Error loading students:', e);
+    document.getElementById('studentMsg').textContent = 'Failed to load students';
+  }
+};
+
+document.getElementById('studentLoginBtn').onclick = async () => {
+  const pw = document.getElementById('studentPwd').value;
+  if (!window._selStudent) return alert("Pick a student first");
+  try {
+    const r = await fetch('/api/login_student', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({student_id: window._selStudent.id, password: pw}),
+      credentials: 'include'
+    });
+    const d = await r.json();
+    document.getElementById('studentMsg').textContent = d.ok ? "Logged in." : (d.msg || "failed");
+    if (d.ok) {
+      document.getElementById('studentAuth').classList.add('hidden');
+      window.open('/student/progress', '_blank');
+    }
+  } catch (e) {
+    console.error('Error logging in student:', e);
+    document.getElementById('studentMsg').textContent = 'Login failed';
+  }
+};
+
+function addAZPanel(listId) {
+  const existingPanel = document.getElementById(`${listId}-az-panel`);
+  if (existingPanel) existingPanel.remove();
+  const azPanel = document.createElement('div');
+  azPanel.id = `${listId}-az-panel`;
+  azPanel.className = 'absolute right-0 top-0 h-full w-10 bg-gray-200 flex flex-col items-center overflow-y-auto text-sm';
+  for (let i = 65; i <= 90; i++) {
+    const letter = String.fromCharCode(i);
+    const btn = document.createElement('button');
+    btn.textContent = letter;
+    btn.className = 'p-1 w-full hover:bg-gray-300';
+    btn.onclick = () => {
+      const buttons = document.querySelectorAll(`#${listId} button`);
+      for (let b of buttons) {
+        if (b.textContent.trim()[0].toUpperCase() === letter) {
+          b.scrollIntoView({behavior: 'smooth'});
+          break;
+        }
+      }
+    };
+    azPanel.appendChild(btn);
+  }
+  document.querySelector(`#${listId}`).parentNode.appendChild(azPanel);
+}
+</script>
+</body>
+</html>

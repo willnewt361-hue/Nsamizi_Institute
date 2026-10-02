@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Login - Nsamizi Digital Fortress</title>
+  <link rel="stylesheet" href="/static/css/modern.css">
+  <style>
+    .login-form .role-selection select { width: 100%; }
+    #login-fields { margin-top: 1.5rem; }
+  </style>
+</head>
+<body class="login-body">
+  <div class="login-container">
+    <div class="login-header">
+      <img src="{{ url_for('static', filename='images.png') }}" alt="NTISD Logo" class="login-logo">
+      <h1>Nsamizi Training Institute</h1>
+      <p>Digital Fortress System</p>
+    </div>
+    <div class="login-form">
+      <div class="role-selection">
+        <label for="role"><strong>Select Your Role</strong></label>
+        <select id="role" class="form-control">
+          <option value="">-- Choose Role --</option>
+          <option value="student">Student</option>
+          <option value="lecturer">Lecturer</option>
+          <option value="staff">Staff</option>
+          <option value="hod">Head of Department</option>
+          <option value="coordinator">Coordinator (Center)</option>
+          <option value="coordinator_overall">Overall Coordinator</option>
+          <option value="principal">Principal</option>
+          <option value="deputy_principal">Deputy Principal</option>
+          <option value="admin">Administrator</option>
+        </select>
+      </div>
+      <div id="login-fields">
+        <div class="form-group">
+          <label for="identifier"><strong id="identifier-label">Email / Registration Number</strong></label>
+          <input type="text" id="identifier" class="form-control" placeholder="Enter your credentials" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="password"><strong>Password</strong></label>
+          <input type="password" id="password" class="form-control" placeholder="Enter your password" autocomplete="off">
+        </div>
+        <button id="login-btn" class="btn btn-primary btn-block btn-lg">Login</button>
+        <div id="msg" class="message"></div>
+      </div>
+      <div id="please-select" class="alert alert-info text-center" style="margin-top: 2rem;">
+        Please select your role to continue
+      </div>
+      <footer class="home-footer" style="margin-top: 3rem;">
+        <p>&copy; 2026 Nsamizi Training Institute. All rights reserved.</p>
+      </footer>
+    </div>
+  </div>
+  
+
+  <script>
+    const API = "/api";
+
+    document.getElementById('role').addEventListener('change', function() {
+      const role = this.value;
+      const fields = document.getElementById('login-fields');
+      const label = document.getElementById('identifier-label');
+      const pleaseSelect = document.getElementById('please-select');
+      const identifier = document.getElementById('identifier');
+      
+      if (!role) {
+        fields.style.display = 'none';
+        pleaseSelect.style.display = 'block';
+      } else {
+        fields.style.display = 'block';
+        pleaseSelect.style.display = 'none';
+        
+        if (role === 'student') {
+          label.textContent = 'Registration Number';
+          identifier.placeholder = 'E.g., NS2025-000000001';
+        } else {
+          label.textContent = 'Email Address';
+          identifier.placeholder = 'E.g., john@nsamizi';
+        }
+        identifier.focus();
+      }
+    });
+
+    document.getElementById('login-btn').onclick = async () => {
+      const role = document.getElementById('role').value;
+      const identifier = document.getElementById('identifier').value.trim();
+      const password = document.getElementById('password').value;
+      const msg = document.getElementById('msg');
+
+      if (!role) {
+        showMessage('Please select a role', 'error');
+        return;
+      }
+
+      if (!identifier || !password) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      try {
+        let endpoint, data;
+        if (role === 'student') {
+          endpoint = '/api/login_student';
+          data = { reg_no: identifier, password: password };
+        } else {
+          endpoint = '/api/login_person';
+          data = { email: identifier, password: password, role :role };
+        }
+
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(data),
+          credentials: 'include'
+        });
+
+        const d = await res.json();
+        if (d.ok) {
+          showMessage('Login successful! Redirecting...', 'success');
+          // Store user info for welcome splash
+          sessionStorage.setItem('userFullname', d.fullname);
+          sessionStorage.setItem('userRole', d.role || role);
+          setTimeout(() => {
+            window.location.href = `/welcome?name=${encodeURIComponent(d.fullname)}&role=${d.role || role}`;
+          }, 500);
+        } else {
+          showMessage(d.msg || 'Login failed. Please check your credentials.', 'error');
+        }
+      } catch (e) {
+        console.error('Error logging in:', e);
+        showMessage('Network error. Please try again.', 'error');
+      }
+    };
+
+    function showMessage(text, type) {
+      const msg = document.getElementById('msg');
+      msg.textContent = text;
+      msg.className = 'message ' + type;
+      msg.style.display = 'block';
+    }
+
+    // Allow Enter key to submit
+    document.getElementById('password').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('login-btn').click();
+      }
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - NTISD</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .splash-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.6s ease-out;
+            max-width: 500px;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo-icon {
+            font-size: 50px;
+        }
+
+        .welcome-text {
+            margin-bottom: 15px;
+            font-size: 24px;
+            font-weight: 300;
+            color: #666;
+        }
+
+        .user-fullname {
+            font-size: 42px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 15px 0;
+            animation: fadeInScale 0.8s ease-out 0.3s both;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-top: 15px;
+            text-transform: capitalize;
+            animation: fadeInScale 0.8s ease-out 0.5s both;
+        }
+
+        .loading-dots {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            animation: fadeInScale 0.8s ease-out 0.7s both;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: bounce 1.4s infinite;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+        }
+
+        .message-text {
+            color: #999;
+            font-size: 13px;
+            margin-top: 25px;
+            font-style: italic;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 3px;
+            background: #f0f0f0;
+            border-radius: 2px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            animation: fillProgress 3s ease-out forwards;
+        }
+
+        @keyframes fillProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="splash-container">
+        <div class="logo">
+            <div class="logo-icon">📚</div>
+        </div>
+        <div class="welcome-text">Welcome back to</div>
+        <div class="user-fullname" id="fullname">Loading...</div>
+        <div class="role-badge" id="role-badge">Student</div>
+        <div class="loading-dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <div class="message-text">Redirecting to your dashboard...</div>
+    </div>
+
+    <script>
+        // Get user info from URL parameters or session storage
+        const params = new URLSearchParams(window.location.search);
+        const fullname = params.get('name') || sessionStorage.getItem('userFullname') || 'Student';
+        const role = params.get('role') || sessionStorage.getItem('userRole') || 'student';
+
+        // Update page with user info
+        document.getElementById('fullname').textContent = fullname;
+        document.getElementById('role-badge').textContent = role.replace('_', ' ');
+
+        // Redirect after 3 seconds
+        setTimeout(() => {
+            const dashboardMap = {
+                'student': '/student/progress',
+                'lecturer': '/staff/dashboard',
+                'staff': '/staff/dashboard',
+                'principal': '/staff/dashboard',
+                'hod': '/staff/dashboard',
+                'deputy_principal': '/staff/dashboard',
+                'coordinator': '/staff/dashboard',
+                'coordinator_overall': '/staff/dashboard',
+                'admin': '/admin/dashboard'
+            };
+
+            const redirectUrl = dashboardMap[role] || '/';
+            window.location.href = redirectUrl;
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+Errors
+
+400  - Bad request
+401  - Unauthorised <authentication>(person is not logged in, n maybe entered wrong pwd)
+402  - 
+403  - Forbidden <authorisation>(person is not logged in) /// CSRF or blocked
+404  - A resource is not found 
+405  - Wrong method used for http
+500  - Internal Server error(flask crash), it's an exception that Flask catches and returns the error
+503  - Server is temporarily down  
+
+CORS	frontend/backend mismatch

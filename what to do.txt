@@ -1,0 +1,75 @@
+System is Nsamizi-Digital-Fortress 
+system should be a tracking system. Has learners with their course(Diploma-2years, Degree-3years) and they should be able to log in and see their results, 
+it should also have lecturers(can input marks of learners and see their information), 
+coordinators(can tell lecturer about any missing marks of students,check student results and their details),
+coordinators are dividede into 2(overall coordinator{for All centres, therefore same as coordinator but for his is for all centres}, coordinator{for only 1 centre, therefore they only access students of that center and the lecturers})
+principal(they are able to see all lecturers and the courses they teach plus student information and overall performance of institute(perfomance of students)) who can log in the system. 
+principal is divided into 2(Princpal,Deputy Principal- both have the same roles)
+all should be able to see details of themself, lecturers and students
+
+results of learners should be stored in a database(mysql database- postgresql) with everything in alphabetical order.  
+results should be kept in system even after a learner/student finishes his/her course.(i want this information to be able to be stored for years(their results, tution payment, etc.).) 
+i want this sytem to be able to trace whether a student has paid their tution and always gives them reminders on their dashboard incase they didnt pay and also, i want to put Bible quotes on everyones dashboard(the staff and students)
+lets add an admin panel but they can log in as a staff but their ui is different as it gives performance details of system, logs of login, suspicious activity(hacking, login fails, brute-force),system overview(shows total number of users on system), details of students and teachers.(in alphabetical order)
+what measures can we put in system for stuff like brute-force, spoofing, sqlmap injection, metasploit, etc. if one attempts 3 logins and fails, system blocks them till next day(after 24hours)
+every semester results should be saved in system but independent according to course(i think the system should create excel files for the tests done in each Semester and keeps the results there and they are readonly to everyone part from admins)
+
+please check my directory,every file and adjust from there please.put in some latest good features but do not change some good stuff i have(change-login part, dashboard pages, plus all other(plus panel part on home page and change home page ui )plus improve security of system.)
+lets add parameterised queries,real encryption system(bcrypt-if ANY). lets make this system, a real production system.
+system should be backed up and it should have a script for recovery of system. 
+
+
+
+please do everything and add all premium features you recommend but please make the ui very classic and attractive
+instead of the sqlite, lets use postgresql in system.
+btw focus more on the fees feature and use value 1.2m(UGX 1,200,000). please in every code, please put use of every  line of c ode and after create the readme file
+
+------------------------------------------------------------------
+Principal, and overall coordinators can see tution payment status of students and coordinators can see tution payment of students at their centre. btw some stuff aint working , please review everything in system whether it works. i think we add a login page for system and make index.html to be just a home page that links to login page. instead of listing peoples names they should type in their but that feature of listing roles should stay but put on login page as one logs in. lets also create a css for styling coz tailwind isnt styling the webpages as i want part from the index.html that was nic e. please ur free to change everything to a more standard way please. Please change everything to be standard but u can leave fetures u think are good for system.     
+-------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+bro, there is an error (
+127.0.0.1 - - [11/May/2026 22:27:28] "GET /static/images.png HTTP/1.1" 304 -
+[2026-05-11 22:27:50,509] ERROR in app: Exception on /api/login_student [POST]
+Traceback (most recent call last):
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 2190, in wsgi_app
+    response = self.full_dispatch_request()
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1486, in full_dispatch_request    rv = self.handle_user_exception(e)
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask_cors\extension.py", line 176, in wrapped_function
+    return cors_after_request(app.make_response(f(*args, **kwargs)))
+                                                ~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1484, in full_dispatch_request    rv = self.dispatch_request()
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1469, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Will_Newton\Desktop\Nsamizi full demo\app-1.py", line 462, in login_student
+    return jsonify({"ok":True,"fullname":st.full_name,"role":"student"})
+                                         ^^^^^^^^^^^^
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\orm\attributes.py", line 569, in __get__
+    return self.impl.get(state, dict_)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\orm\attributes.py", line 1096, in get
+    value = self._fire_loader_callables(state, key, passive)
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\orm\attributes.py", line 1126, in _fire_loader_callables
+    return state._load_expired(state, passive)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\orm\state.py", line 828, in _load_expired
+    self.manager.expired_attribute_loader(self, toload, passive)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Will_Newton\AppData\Local\Programs\Python\Python313\Lib\site-packages\sqlalchemy\orm\loading.py", line 1607, in load_scalar_attributes
+    raise orm_exc.DetachedInstanceError(
+    ...<2 lines>...
+    )
+sqlalchemy.orm.exc.DetachedInstanceError: Instance <Student at 0x1a634c66990> is not bound to a Session; attribute refresh operation cannot proceed (Background on this error at: https://sqlalche.me/e/20/bhk3)
+127.0.0.1 - - [11/May/2026 22:27:50] "POST /api/login_student HTTP/1.1" 500 -)

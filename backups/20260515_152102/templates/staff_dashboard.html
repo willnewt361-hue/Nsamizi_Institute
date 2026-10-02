@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>{{ role | capitalize }} Dashboard - NTISD</title>
+  <link rel="stylesheet" href="/static/css/modern.css">
+</head>
+<body style="background-color: #f8f9fa;">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="{{ url_for('static', filename='images.png') }}" alt="NTISD Logo">
+      <span>{{ role | capitalize }} Dashboard</span>
+    </div>
+    <div class="navbar-nav">
+      <a href="/">Home</a>
+      <a href="/logout" class="btn btn-outline btn-sm">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container" style="margin-top: 2rem; margin-bottom: 2rem;">
+    <!-- Header Card -->
+    <div class="card mb-4" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: white; border: none;">
+      <div class="card-body">
+        <h1 class="mb-1" style="color: white;">Welcome, Staff Member!</h1>
+        <p class="mb-0" style="opacity: 0.9;">{{ role | capitalize }} Portal - Nsamizi Training Institute</p>
+      </div>
+    </div>
+
+    <!-- Bible Quote -->
+    <div class="bible-quote">
+      <p id="bible-verse">Loading daily inspiration...</p>
+      <p style="margin-top: 0.5rem; font-size: 0.9rem; font-style: normal;" id="bible-ref"></p>
+    </div>
+
+    <!-- My Courses Section -->
+    {% if role in ['lecturer', 'staff', 'hod'] %}
+      <div class="card mt-4">
+        <div class="card-header">
+          <h3 class="mb-0">📚 My Courses</h3>
+        </div>
+        <div class="card-body">
+          {% if courses %}
+            <div class="row row-2">
+              {% for course in courses %}
+                <div class="card" style="border: 2px solid var(--primary-light); cursor: pointer;" onclick="loadCourseDetails('{{ course.course_id }}', '{{ course.code }}', '{{ course.title }}')">
+                  <div class="card-body">
+                    <h5 style="color: var(--primary-color);" class="mb-2">{{ course.code }}</h5>
+                    <p class="mb-1">{{ course.title }}</p>
+                    <small class="text-muted">{{ course.students | length }} student(s)</small>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-info mb-0">No courses assigned to you</div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Centers Section -->
+    <div class="card mt-4">
+      <div class="card-header">
+        <h3 class="mb-0">🏢 Centers</h3>
+      </div>
+      <div class="card-body">
+        <div class="row row-2">
+          <div>
+            <h5 style="color: var(--primary-color);">Main Campus</h5>
+            {% if main_campus %}
+              <p class="mb-0"><strong>{{ main_campus.name }}</strong></p>
+            {% endif %}
+          </div>
+          <div>
+            <h5 style="color: var(--primary-color);">Other Centers</h5>
+            {% if other_centers %}
+              <ul style="list-style: none; padding: 0; margin: 0;">
+                {% for center in other_centers %}
+                  <li class="mb-2">🏢 {{ center.name }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="text-muted mb-0">No other centers</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Course Details Panel -->
+    <div id="course-panel" class="card mt-4" style="display: none;">
+      <div class="card-header">
+        <h3 class="mb-0" id="course-title">Course Details</h3>
+      </div>
+      <div class="card-body">
+        <div class="row row-2">
+          <div>
+            <h5 style="color: var(--primary-color);">Students in Course</h5>
+            <div id="course-students" style="max-height: 300px; overflow-y: auto;"></div>
+          </div>
+          <div>
+            <h5 style="color: var(--primary-color);">Assessments</h5>
+            <div id="course-assessments" style="max-height: 300px; overflow-y: auto;"></div>
+          </div>
+        </div>
+        <div class="mt-4" style="padding: 1.5rem; background-color: var(--light-gray); border-radius: var(--border-radius);">
+          <h5 style="color: var(--primary-color); margin-bottom: 1rem;">📝 Record Mark</h5>
+          <div class="row row-2">
+            <div class="form-group">
+              <label>Student ID</label>
+              <input type="number" id="mk-student-id" class="form-control" placeholder="Student ID">
+            </div>
+            <div class="form-group">
+              <label>Assessment ID</label>
+              <input type="number" id="mk-assess-id" class="form-control" placeholder="Assessment ID">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Score</label>
+            <input type="number" id="mk-score" class="form-control" placeholder="Enter score" step="0.1">
+          </div>
+          <button class="btn btn-primary" onclick="saveMark()">Save Mark</button>
+          <p id="mk-msg" class="mt-2 mb-0"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="home-footer" style="margin-top: 3rem;">
+    <p>&copy; 2026 Nsamizi Training Institute. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Fetch Bible quote
+    fetch('/api/bible_quote', { credentials: 'include' })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('bible-verse').textContent = `"${data.verse}"`;
+        document.getElementById('bible-ref').textContent = `— ${data.reference}`;
+      })
+      .catch(e => console.error('Bible quote fetch error:', e));
+
+    async function loadCourseDetails(courseId, code, title) {
+      document.getElementById('course-title').textContent = `${code} - ${title}`;
+      document.getElementById('course-panel').style.display = 'block';
+      
+      try {
+        const [stRes, asRes] = await Promise.all([
+          fetch(`/api/course/${courseId}/students`, { credentials: 'include' }),
+          fetch(`/api/course/${courseId}/assessments`, { credentials: 'include' })
+        ]);
+        
+        const students = await stRes.json();
+        const assessments = await asRes.json();
+        
+        let studentsHtml = '';
+        students.forEach(s => {
+          studentsHtml += `<div class="p-2 border rounded mb-2" style="cursor: pointer;" onclick="document.getElementById('mk-student-id').value = ${s.student_id}">${s.reg_no} - ${s.name}</div>`;
+        });
+        document.getElementById('course-students').innerHTML = studentsHtml || '<p class="text-muted">No students enrolled</p>';
+        
+        let assessmentsHtml = '';
+        assessments.forEach(a => {
+          assessmentsHtml += `<div class="p-2 border rounded mb-2" style="cursor: pointer;" onclick="document.getElementById('mk-assess-id').value = ${a.assessment_id}">${a.title} (max ${a.max_score})</div>`;
+        });
+        document.getElementById('course-assessments').innerHTML = assessmentsHtml || '<p class="text-muted">No assessments</p>';
+      } catch (e) {
+        console.error('Error loading course details:', e);
+        alert('Error loading course details');
+      }
+    }
+
+    async function saveMark() {
+      const studentId = document.getElementById('mk-student-id').value;
+      const assessmentId = document.getElementById('mk-assess-id').value;
+      const score = document.getElementById('mk-score').value;
+      const msg = document.getElementById('mk-msg');
+
+      if (!studentId || !assessmentId || score === '') {
+        msg.textContent = 'Please fill all fields';
+        msg.style.color = 'var(--danger-color)';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/marks', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            student_id: Number(studentId),
+            assessment_id: Number(assessmentId),
+            scored: Number(score)
+          }),
+          credentials: 'include'
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          msg.textContent = '✓ Mark saved successfully';
+          msg.style.color = 'var(--success-color)';
+          document.getElementById('mk-student-id').value = '';
+          document.getElementById('mk-assess-id').value = '';
+          document.getElementById('mk-score').value = '';
+        } else {
+          msg.textContent = data.msg || 'Error saving mark';
+          msg.style.color = 'var(--danger-color)';
+        }
+      } catch (e) {
+        console.error('Error:', e);
+        msg.textContent = 'Network error';
+        msg.style.color = 'var(--danger-color)';
+      }
+    }
+  </script>
+</body>
+</html>

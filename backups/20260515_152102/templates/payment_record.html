@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>record payment</title>
+    <link rel="stylesheet" href="/static/css/modern.css">
+</head>
+<body>
+
+<div class="container">
+    <h1>Record student payment</h1>
+    <form id="paymentForm">
+        <label>Student id</label>
+        <input type="number" id="student_id" required>
+
+        <label>Amount</label>
+        <input type="number" id="amount" required>
+
+        <label>Semester</label>
+        <input type="text" id="semester" required>
+
+        <label>Payment method</label>
+        <select id="method">
+            <option>mobile money</option>
+            <option>bank</option>
+            <option>cash</option>
+        </select>
+
+        <label>Transaction code</label>
+        <input type="text" id="transaction_code">
+        <label>notes</label>
+        <textarea id="notes"></textarea>
+        <button type="submit">save payment</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("paymentForm").addEventListener("submit", async (e)=>{
+    e.preventDefault();
+    const res = await fetch("/api/finance/payment", {
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({
+            student_id: document.getElementById("student_id").value,
+            amount: document.getElementById("amount").value,
+            semester: document.getElementById("semester").value,
+            method: document.getElementById("method").value,
+            transaction_code: document.getElementById("transaction_code").value,
+            notes: document.getElementById("notes").value
+        })
+    });
+
+    const data = await res.json();
+    if(data.ok){
+        alert("payment saved");
+    } else {
+        alert("error");
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>About - Nsamizi Training Institute</title>
+  <link rel="stylesheet" href="/static/css/modern.css">
+</head>
+<body style="background-color: #f8f9fa;">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="{{ url_for('static', filename='images.png') }}" alt="NTISD Logo">
+      <span>Nsamizi Institute</span>
+    </div>
+    <div class="navbar-nav">
+      <a href="/">Home</a>
+      <a href="/login">Login</a>
+    </div>
+  </nav>
+
+  <div class="container" style="max-width: 900px; margin-top: 2rem; margin-bottom: 2rem;">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="mb-0">About Nsamizi Training Institute</h2>
+      </div>
+      <div class="card-body">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <img src="{{ url_for('static', filename='images.png') }}" alt="NTISD Logo" style="height: 80px; margin-bottom: 1rem;">
+        </div>
+
+        <h3>History & Mission</h3>
+        <p>Founded in 1953, Nsamizi Training Institute of Social Development (NTISD) is a premier institution dedicated to training professional social development workers. Our mission is to equip students with knowledge, skills, and values needed to contribute to sustainable social development.</p>
+
+        <h3>Academic Programs</h3>
+        <p>We offer diverse academic programs tailored to meet the needs of social development professionals:</p>
+        <ul style="list-style: none; padding-left: 0;">
+          <li class="mb-2">✓ <strong>Social Work</strong> - Diploma & Degree</li>
+          <li class="mb-2">✓ <strong>Community Health Management</strong></li>
+          <li class="mb-2">✓ <strong>Guidance and Counseling</strong></li>
+          <li class="mb-2">✓ <strong>Gender and Development</strong></li>
+          <li class="mb-2">✓ <strong>Business Administration</strong></li>
+          <li class="mb-2">✓ <strong>Human Resource Management</strong></li>
+        </ul>
+
+        <h3 class="mt-4">Facilities & Centers</h3>
+        <p>Our main campus is located in Mpigi Town Council with satellite centers in strategic locations:</p>
+        <div class="row row-2 mt-3">
+          <div class="card" style="border: 2px solid var(--primary-light);">
+            <div class="card-body">
+              <h5 class="text-center">Main Campus</h5>
+              <p class="text-center mb-0"><strong>Mpigi Town Council</strong></p>
+            </div>
+          </div>
+          <div>
+            <p><strong>Regional Centers:</strong></p>
+            <ul style="list-style: none; padding-left: 0;">
+              <li>🏢 Kampala</li>
+              <li>🏢 Gulu</li>
+              <li>🏢 Adjumani</li>
+              <li>🏢 Nsambya</li>
+              <li>🏢 Kasese</li>
+              <li>🏢 Lira</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 class="mt-4">Community Engagement</h3>
+        <p>NTISD is committed to community development and social responsibility. We maintain strategic partnerships with organizations like UNHCR, supporting refugee populations with essential services including water, sanitation, and sustainable livelihood programs.</p>
+
+        <h3 class="mt-4">Digital Fortress System</h3>
+        <p>Our modern student management system ensures secure tracking of academic progress, transparent fee management, and efficient communication between students, lecturers, and administration. Built with enterprise-grade security and designed for accessibility across all our centers.</p>
+
+        <div style="margin-top: 2rem; padding: 1.5rem; background-color: var(--primary-light); border-radius: var(--border-radius);">
+          <h5 style="color: var(--primary-color);">📄 Official Documents</h5>
+          <a href="{{ url_for('static', filename='BA-FEES-STRUCTURE.pdf') }}" target="_blank" class="btn btn-primary">View BA Fees Structure (PDF)</a>
+          <a href="{{ url_for('static', filename='Application-form.pdf') }}" target="_blank" class="btn btn-primary" style="margin-left: 0.5rem;">Application Form (PDF)</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="home-footer" style="margin-top: 2rem;">
+    <p>&copy; 2026 Nsamizi Training Institute. All rights reserved.</p>
+  </footer>
+</body>
+</html>

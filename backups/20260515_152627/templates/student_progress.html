@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Student Dashboard - NTISD</title>
+  <link rel="stylesheet" href="/static/css/modern.css">
+  <style>
+    .progress-bar { height: 8px; background-color: var(--light-gray); border-radius: 4px; overflow: hidden; }
+    .progress-fill { background-color: var(--primary-color); height: 100%; transition: var(--transition); }
+    .mark-container { background: white; border-radius: var(--border-radius); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: var(--shadow-sm); }
+    .assessment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+    .assessment-title { font-weight: 600; color: var(--primary-color); }
+    .mark-score { font-size: 1.5rem; font-weight: 700; }
+  </style>
+</head>
+<body style="background-color: #f8f9fa;">
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="{{ url_for('static', filename='images.png') }}" alt="NTISD Logo">
+      <span>Student Portal</span>
+    </div>
+    <div class="navbar-nav">
+      <a href="/">Home</a>
+      <a href="/logout" class="btn btn-outline btn-sm">Logout</a>
+    </div>
+  </nav>
+
+  <div class="container" style="margin-top: 2rem; margin-bottom: 2rem;">
+    <!-- Header -->
+    <div class="card mb-4" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: white; border: none;">
+      <div class="card-body">
+        <div style="display: flex; align-items: center; gap: 2rem;">
+          {% if student.photo_url %}
+            <img src="{{ url_for('static', filename=student.photo_url) }}" alt="{{ student.full_name }}" style="height: 80px; width: 80px; border-radius: 50%; object-fit: cover; border: 3px solid white;">
+          {% else %}
+            <div style="height: 80px; width: 80px; border-radius: 50%; background-color: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; border: 3px solid white; font-size: 2rem;">👤</div>
+          {% endif %}
+          <div>
+            <h1 class="mb-1" style="color: white;">{{ student.full_name }}</h1>
+            <p style="margin: 0; opacity: 0.9;">Registration: <strong>{{ student.reg_no }}</strong></p>
+            {% if student.course_type %}
+              <p style="margin: 0; opacity: 0.9;">Program: <strong>{{ student.course_type | title }}</strong></p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bible Quote -->
+    <div class="bible-quote">
+      <p id="bible-verse">Loading daily inspiration...</p>
+      <p style="margin-top: 0.5rem; font-size: 0.9rem; font-style: normal;" id="bible-ref"></p>
+    </div>
+
+    <!-- Feature Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+      <a href="/fees/payment-guide" style="text-decoration: none; color: inherit;">
+        <div style="background: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); border-left: 4px solid #667eea; cursor: pointer; transition: all 0.3s ease; hover: transform translateY(-5px);">
+          <h3 style="margin: 0 0 0.5rem; color: #667eea;">💳 Fee Payment</h3>
+          <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Learn payment methods & guidelines</p>
+        </div>
+      </a>
+
+      <a href="/fees/history" style="text-decoration: none; color: inherit;">
+        <div style="background: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); border-left: 4px solid #51cf66; cursor: pointer; transition: all 0.3s ease;">
+          <h3 style="margin: 0 0 0.5rem; color: #51cf66;">📋 Payment History</h3>
+          <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">View all transactions & balance</p>
+        </div>
+      </a>
+
+      <a onclick="alert('Attendance tracking coming soon!')" style="text-decoration: none; color: inherit; cursor: pointer;">
+        <div style="background: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); border-left: 4px solid #ff922b; opacity: 0.7;">
+          <h3 style="margin: 0 0 0.5rem; color: #ff922b;">📊 Attendance</h3>
+          <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">Track attendance & percentages</p>
+        </div>
+      </a>
+
+      <a onclick="alert('Badges & certificates coming soon!')" style="text-decoration: none; color: inherit; cursor: pointer;">
+        <div style="background: white; padding: 1.5rem; border-radius: var(--border-radius); box-shadow: var(--shadow-sm); border-left: 4px solid #9c36b5; opacity: 0.7;">
+          <h3 style="margin: 0 0 0.5rem; color: #9c36b5;">🏆 Badges & Certificates</h3>
+          <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">View achievements & awards</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- Courses Section -->
+    <div style="margin-top: 2rem;">
+      {% if courses %}
+        {% for course in courses %}
+          <div class="mark-container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid var(--border-color);">
+              <div>
+                <h2 class="mb-1">{{ course.code }}</h2>
+                <p class="text-muted mb-0">{{ course.title }}</p>
+              </div>
+            </div>
+
+            {% if course.marks %}
+              <div style="overflow-x: auto;">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Assessment</th>
+                      <th>Date</th>
+                      <th style="text-align: center;">Max Score</th>
+                      <th style="text-align: center;">Your Score</th>
+                      <th style="text-align: center;">Percentage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for mark in course.marks %}
+                      {% set percentage = (mark.scored / mark.max * 100) if mark.max else 0 %}
+                      {% set status = 'success' if percentage >= 70 else ('warning' if percentage >= 50 else 'danger') %}
+                      <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ mark.assessment }}</strong></td>
+                        <td>{{ mark.date }}</td>
+                        <td style="text-align: center;">{{ mark.max }}</td>
+                        <td style="text-align: center;"><strong class="text-{{ status }}">{{ mark.scored }}</strong></td>
+                        <td style="text-align: center;">
+                          <span class="badge" style="background-color: {% if percentage >= 70 %}var(--success-color){% elif percentage >= 50 %}var(--warning-color){% else %}var(--danger-color){% endif %}; color: white; padding: 0.25rem 0.75rem; border-radius: 20px;">
+                            {{ "%.1f"|format(percentage) }}%
+                          </span>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Lecturer Comments -->
+              {% set has_comments = course.marks | selectattr('comment') | list | length > 0 %}
+              {% if has_comments %}
+                <div style="margin-top: 1.5rem; padding: 1.5rem; background-color: var(--primary-light); border-radius: var(--border-radius); border-left: 4px solid var(--primary-color);">
+                  <h5 style="color: var(--primary-color); margin-bottom: 1rem;">📝 Lecturer Comments</h5>
+                  {% for mark in course.marks %}
+                    {% if mark.comment %}
+                      <div style="margin-bottom: 0.75rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(0,102,204,0.2);">
+                        <strong>{{ mark.assessment }}:</strong>
+                        <p style="margin: 0.25rem 0 0 0; color: var(--text-dark);">{{ mark.comment }}</p>
+                      </div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="alert alert-info">No marks recorded yet for this course.</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="alert alert-info">
+          <h5 class="mb-2">No Courses Enrolled</h5>
+          <p class="mb-0">You are not currently enrolled in any courses. Please contact your coordinator for enrollment information.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Tuition Status -->
+    <div class="mark-container">
+      <h3 style="color: var(--primary-color); margin-bottom: 1.5rem;">💰 Tuition Payment Status</h3>
+      <div id="tuition-status"></div>
+    </div>
+  </div>
+
+  <footer class="home-footer" style="margin-top: 3rem;">
+    <p>&copy; 2026 Nsamizi Training Institute. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Fetch tuition status
+    fetch('/api/student/{{ student.id }}/tuition', { credentials: 'include' })
+      .then(response => response.json())
+      .then(data => {
+        const container = document.getElementById('tuition-status');
+        if (data.length === 0) {
+          container.innerHTML = '<div class="alert alert-info">No tuition records found.</div>';
+        } else {
+          let html = '<table class="table"><thead><tr><th>Semester</th><th>Amount (UGX)</th><th>Due Date</th><th>Status</th></tr></thead><tbody>';
+          data.forEach(payment => {
+            const statusClass = payment.status === 'paid' ? 'success' : (payment.status === 'overdue' ? 'danger' : 'warning');
+            html += `<tr><td>${payment.semester}</td><td>${Number(payment.amount).toLocaleString()}</td><td>${payment.due_date}</td><td><span class="badge text-${statusClass}" style="background-color: var(--${statusClass}-color); color: white; padding: 0.25rem 0.75rem; border-radius: 20px;">${payment.status.toUpperCase()}</span></td></tr>`;
+          });
+          html += '</tbody></table>';
+          container.innerHTML = html;
+        }
+      })
+      .catch(e => {
+        console.error('Tuition fetch error:', e);
+        document.getElementById('tuition-status').innerHTML = '<div class="alert alert-danger">Error loading tuition information</div>';
+      });
+
+    // Fetch Bible quote
+    fetch('/api/bible_quote', { credentials: 'include' })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById('bible-verse').textContent = `"${data.verse}"`;
+        document.getElementById('bible-ref').textContent = `— ${data.reference}`;
+      })
+      .catch(e => console.error('Bible quote fetch error:', e));
+  </script>
+</body>
+</html>

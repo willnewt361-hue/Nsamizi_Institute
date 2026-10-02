@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width", initial-scale="1.0">
+    <title>Finance Dashboard</title>
+    <style>
+        .navbar {
+            background-color: white;
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+            
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .navbar-nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            list-style: none;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="/static/images.png" alt="NTISD Logo">
+      <span>Student Portal</span>
+    </div>
+    <div class="navbar-nav">
+      <a href="/">Home</a>
+      <a href="/logout" class="btn btn-outline btn-sm">Logout</a>
+    </div>
+  </nav>
+    <p><a href="/templates/payment_record.html"> Record student payment if they have paid to you. </a></p>
+    <p><a href="/templates/fee_payment_guide.html"> Fee payment guide. </a></p>
+</body>
+</html>
+
+

@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Payment History - NTISD</title>
+    <link rel="stylesheet" href="/static/css/modern.css">
+    <style>
+        .container-custom {
+            margin-top: 80px;
+            padding: 20px;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .header-section {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
+
+        .header-section h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .summary-card.warning {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+
+        .summary-card.success {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        }
+
+        .summary-label {
+            font-size: 12px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .history-table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .table-header h2 {
+            color: #333;
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .history-table thead th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            font-size: 13px;
+            border-bottom: 2px solid #eee;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .history-table tbody td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #666;
+        }
+
+        .history-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .history-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.paid {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-badge.unpaid {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .status-badge.overdue {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .amount-column {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .date-column {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        @media (max-width: 768px) {
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .history-table {
+                font-size: 13px;
+            }
+
+            .history-table td, .history-table th {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">📚 NTISD</a>
+        </div>
+    </nav>
+
+    <div class="container-custom">
+        <div class="header-section">
+            <h1>💳 Fee Payment History</h1>
+            <p style="color: #666; margin: 0;">Track all your tuition payments and outstanding balances</p>
+
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-label">Total Paid</div>
+                    <div class="summary-value" id="total-paid">UGX 0</div>
+                </div>
+                <div class="summary-card warning">
+                    <div class="summary-label">Outstanding Balance</div>
+                    <div class="summary-value" id="total-outstanding">UGX 0</div>
+                </div>
+                <div class="summary-card success">
+                    <div class="summary-label">Payment Status</div>
+                    <div class="summary-value" id="payment-status">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-table-container">
+            <div class="table-header">
+                <h2>📋 Payment Records</h2>
+            </div>
+
+            <div class="action-buttons" style="padding: 20px;">
+                <button class="btn-secondary" onclick="printHistory()">🖨️ Print</button>
+                <button class="btn-secondary" onclick="exportHistory()">📥 Export</button>
+            </div>
+
+            <table class="history-table" id="payment-table">
+                <thead>
+                    <tr>
+                        <th>Semester</th>
+                        <th>Amount</th>
+                        <th>Due Date</th>
+                        <th>Paid Date</th>
+                        <th>Status</th>
+                        <th>Days Overdue</th>
+                    </tr>
+                </thead>
+                <tbody id="payment-body">
+                    <tr>
+                        <td colspan="6" class="no-data">Loading payment history...</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #2e7d32;"></div>
+                    <span>Paid on time</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #c62828;"></div>
+                    <span>Outstanding payment</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-dot" style="background: #e65100;"></div>
+                    <span>Overdue payment</span>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; background: #f0f4ff; border-radius: 12px;">
+            <p style="color: #667eea; margin: 0; font-size: 13px;">
+                ℹ️ Questions about your payments? Contact Finance Office: +256 393 123 456
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="/student/progress" style="color: #667eea; text-decoration: none; font-weight: 600;">
+                ← Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <script>
+        async function loadPaymentHistory() {
+            try {
+                const res = await fetch(`/api/student/${getStudentId()}/fee-history`, {
+                    credentials: 'include'
+                });
+                const payments = await res.json();
+                displayPayments(payments);
+            } catch (e) {
+                console.error('Error loading payment history:', e);
+                document.getElementById('payment-body').innerHTML = 
+                    '<tr><td colspan="6" class="no-data">Error loading payment history</td></tr>';
+            }
+        }
+
+        function getStudentId() {
+            // Extract from session or URL - for now using a placeholder
+            // In production, this should come from the server session
+            return new URLSearchParams(window.location.search).get('student_id') || 1;
+        }
+
+        function displayPayments(payments) {
+            if (!payments || payments.length === 0) {
+                document.getElementById('payment-body').innerHTML = 
+                    '<tr><td colspan="6" class="no-data">No payment records found</td></tr>';
+                return;
+            }
+
+            let totalPaid = 0;
+            let totalOutstanding = 0;
+
+            const rows = payments.map(p => {
+                const isPaid = p.status === 'paid';
+                if (isPaid) totalPaid += p.amount;
+                else totalOutstanding += p.amount;
+
+                const isOverdue = p.days_overdue > 0;
+                const status = isPaid ? 'paid' : (isOverdue ? 'overdue' : 'unpaid');
+
+                return `
+                    <tr>
+                        <td>${p.semester || 'N/A'}</td>
+                        <td class="amount-column">UGX ${p.amount.toLocaleString()}</td>
+                        <td class="date-column">${new Date(p.due_date).toLocaleDateString()}</td>
+                        <td class="date-column">${p.paid_date ? new Date(p.paid_date).toLocaleDateString() : '-'}</td>
+                        <td><span class="status-badge ${status}">${status}</span></td>
+                        <td>${isOverdue ? p.days_overdue + ' days' : '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('payment-body').innerHTML = rows;
+            document.getElementById('total-paid').textContent = `UGX ${totalPaid.toLocaleString()}`;
+            document.getElementById('total-outstanding').textContent = `UGX ${totalOutstanding.toLocaleString()}`;
+            
+            const allPaid = totalOutstanding === 0;
+            document.getElementById('payment-status').textContent = allPaid ? '✅ UP TO DATE' : '⚠️ PENDING';
+        }
+
+        function printHistory() {
+            window.print();
+        }
+
+        function exportHistory() {
+            alert('Export feature coming soon! You will be able to download as Excel.');
+        }
+
+        loadPaymentHistory();
+    </script>
+</body>
+</html>

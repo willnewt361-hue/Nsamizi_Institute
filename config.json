@@ -1,0 +1,13 @@
+{
+  "DB_URL": "postgresql://nsamizi_user:##000000@localhost:5432/nsamizi_db",
+  "SECRET_KEY": "##000000-nsamizi-2026",
+  "DEMO_BRANCHES": [
+    "Adjumani",
+    "Gulu",
+    "Nsambya",
+    "Kampala",
+    "Mpigi",
+    "Kasese",
+    "Lira"
+  ]
+}

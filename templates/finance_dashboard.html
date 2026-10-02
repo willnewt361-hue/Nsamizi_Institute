@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ summary.title }} - NTISD</title>
+    <link rel="stylesheet" href="/static/css/modern.css">
+    <style>
+        body { background: #f4f6fb; }
+        .finance-header { margin-bottom: 1.5rem; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+        .summary-card { background: white; border-radius: 14px; padding: 20px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06); }
+        .summary-card h3 { margin: 0 0 8px; font-size: 0.95rem; color: #5b5f74; text-transform: uppercase; letter-spacing: 0.08em; }
+        .summary-card .value { font-size: 2rem; font-weight: 700; color: #222; }
+        .section { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 20px 40px rgba(15, 23, 42, 0.06); margin-bottom: 1.5rem; }
+        .section h2 { margin-bottom: 1rem; font-size: 1.35rem; }
+        .table-responsive { overflow-x: auto; }
+        table.finance-table { width: 100%; border-collapse: collapse; }
+        table.finance-table th, table.finance-table td { padding: 12px 14px; border-bottom: 1px solid #e8ebf2; text-align: left; }
+        table.finance-table th { background: #f8f9fd; color: #4b5563; font-weight: 700; }
+        .pill { display: inline-flex; align-items: center; gap: 0.5rem; padding: 8px 12px; border-radius: 999px; font-size: 0.85rem; background: #eef2ff; color: #4338ca; }
+        .profile-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; }
+        .profile-card { border: 1px solid #e6e8f0; border-radius: 16px; padding: 18px; background: #fff; }
+        .profile-card h4 { margin: 0 0 8px; }
+        .profile-card small { display: block; margin-bottom: 10px; color: #6b7280; }
+        .label-inline { display: inline-block; margin-right: 0.5rem; margin-bottom: 0.5rem; padding: 6px 10px; background: #eef2ff; color: #4338ca; border-radius: 999px; font-size: 0.8rem; }
+        .link-card { display: inline-flex; gap: 0.5rem; align-items: center; background: #eef2ff; border-radius: 999px; padding: 0.85rem 1rem; color: #3730a3; text-decoration: none; font-weight: 600; }
+        .badge { background: #f8fafc; border-radius: 999px; padding: 6px 10px; font-size: 0.8rem; color: #334155; }
+    </style>
+</head>
+<body>
+    <nav class="navbar" style="background: white; position: sticky; top: 0; z-index: 10; box-shadow: 0 10px 30px rgba(15,23,42,0.08);">
+        <div class="navbar-brand">
+            <img src="/static/images.png" alt="NTISD Logo" style="height:40px; width:auto;">
+            <span>{{ summary.title }}</span>
+        </div>
+        <div class="navbar-nav">
+            <a href="/">Home</a>
+            <a href="/staff/dashboard">Dashboard</a>
+            <a href="/logout" class="btn btn-outline btn-sm">Logout</a>
+        </div>
+    </nav>
+
+    <main class="container" style="max-width: 1200px; margin: 2rem auto;">
+        <section class="finance-header section">
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <p class="badge">{{ summary.role | replace('_', ' ') | title }}</p>
+                    <h1 style="margin: 0;">{{ summary.title }}</h1>
+                    <p style="margin: 0.5rem 0 0; color: #555; line-height: 1.7;">Welcome, {{ fullname }}. This dashboard shows finance performance for <strong>{{ summary.scope_name }}</strong> and all branch centres.</p>
+                    <p style="margin: 0.5rem 0 0; color: #6b7280;">Branches: {{ summary.centers | join(', ') }}</p>
+                </div>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem;">
+                    <a href="/templates/payment_record.html" class="link-card">💳 Record payment</a>
+                    <a href="/templates/fee_payment_guide.html" class="link-card">📘 Fee guide</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="stats-grid">
+                {% for card in summary.summary_cards %}
+                <div class="summary-card">
+                    <h3>{{ card.label }}</h3>
+                    <div class="value">{% if card.label == 'Grace Students' %}{{ card.value }}{% else %}{{ card.value | money }}{% endif %}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Branch finance overview</h2>
+            <div class="table-responsive">
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>Branch</th>
+                            <th>Collected</th>
+                            <th>Outstanding</th>
+                            <th>Balance</th>
+                            <th>Students</th>
+                            <th>Courses</th>
+                            <th>People</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for branch in summary.branch_stats %}
+                        <tr>
+                            <td>{{ branch.name }}</td>
+                            <td>{{ branch.collected | money }}</td>
+                            <td>{{ branch.due | money }}</td>
+                            <td>{{ branch.balance | money }}</td>
+                            <td>{{ branch.students }}</td>
+                            <td>{{ branch.courses }}</td>
+                            <td>{{ branch.people }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="7">No branch statistics available.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Expense forecast</h2>
+            <div class="stats-grid">
+                <div class="summary-card">
+                    <h3>Transport</h3>
+                    <div class="value">{{ summary.expenses.transport | money }}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Facilitation</h3>
+                    <div class="value">{{ summary.expenses.facilitation | money }}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Admin & operations</h3>
+                    <div class="value">{{ summary.expenses.admin | money }}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Contingency / reserve</h3>
+                    <div class="value">{{ summary.expenses.contingency | money }}</div>
+                </div>
+            </div>
+            <p style="margin-top: 1rem; font-weight: 700;">Total projected expenses: {{ summary.expenses.total | money }}</p>
+        </section>
+
+        <section class="section">
+            <h2>Paid students</h2>
+            <div class="table-responsive">
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Reg No</th>
+                            <th>Branch</th>
+                            <th>Paid total</th>
+                            <th>Paid records</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in summary.paid_students %}
+                        <tr>
+                            <td>{{ student.student_name }}</td>
+                            <td>{{ student.reg_no }}</td>
+                            <td>{{ student.branch }}</td>
+                            <td>{{ student.paid_total | money }}</td>
+                            <td>{{ student.paid_count }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5">No paid student records found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Outstanding balances</h2>
+            <div class="table-responsive">
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Reg No</th>
+                            <th>Branch</th>
+                            <th>Balance due</th>
+                            <th>Unpaid records</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in summary.balance_students %}
+                        <tr>
+                            <td>{{ student.student_name }}</td>
+                            <td>{{ student.reg_no }}</td>
+                            <td>{{ student.branch }}</td>
+                            <td>{{ student.due_total | money }}</td>
+                            <td>{{ student.due_count }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="5">No outstanding payment records found.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Grace period students</h2>
+            <div class="table-responsive">
+                <table class="finance-table">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Reg No</th>
+                            <th>Branch</th>
+                            <th>Balance</th>
+                            <th>Grace amount</th>
+                            <th>Due dates</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for grace in summary.grace_students %}
+                        <tr>
+                            <td>{{ grace.student_name }}</td>
+                            <td>{{ grace.reg_no }}</td>
+                            <td>{{ grace.branch }}</td>
+                            <td>{{ grace.balance | money }}</td>
+                            <td>{{ grace.grace_amount | money }}</td>
+                            <td>{{ grace.due_dates | join(', ') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="6">No grace period students at this time.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section">
+            <div style="display:flex; flex-wrap: wrap; gap: 1rem; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Staff, lecturers & branch people</h2>
+                <p style="color:#6b7280; margin:0;">Total people: {{ summary.total_people }} · Lecturers and program staff overview</p>
+            </div>
+            <div class="profile-grid">
+                {% for person in summary.people_profiles %}
+                <div class="profile-card">
+                    <h4>{{ person.name }}</h4>
+                    <small>{{ person.role | replace('_', ' ') | title }}</small>
+                    <div>
+                        <div class="label-inline">{{ person.branch }}</div>
+                    </div>
+                    {% if person.courses %}
+                    <div style="margin-top: 1rem;">
+                        <strong>Courses:</strong>
+                        <div style="display:flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.5rem;">
+                            {% for course in person.courses %}
+                                <span class="pill">{{ course }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if person.email or person.phone %}
+                    <div style="margin-top: 1rem; color: #555; font-size: 0.95rem;">
+                        {% if person.email %}<div>Email: {{ person.email }}</div>{% endif %}
+                        {% if person.phone %}<div>Phone: {{ person.phone }}</div>{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div>No branch personnel found.</div>
+                {% endfor %}
+            </div>
+        </section>
+
+    </main>
+</body>
+</html>
+
+
